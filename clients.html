@@ -169,9 +169,6 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-height: 90vh;
             overflow-y: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
         }
 
         .modal-content h2 {
@@ -224,6 +221,7 @@
             <a href="gym-qr.html" target="_blank">QR</a>
             <a href="./entry.html">Registrar Entrada</a>
             <a href="./calendar.html">Calendario</a>
+            <a href="notifications.html">🔔 Notificaciones</a>
             <a href="#" id="logoutBtn">Salir</a>
         </div>
     </div>
@@ -237,6 +235,7 @@
 
     <!-- Incluir configuración segura -->
     <script src="js/config.js"></script>
+  
     <script>
 
 
@@ -263,7 +262,7 @@
                 const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
                 const day = days[date.getDay()];
                 return `${day}, ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
-            } catch (error) {
+            } catch {
                 return timestamp;
             }
         }
@@ -277,7 +276,7 @@
                 const diffTime = Math.abs(today - lastPayment);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 return diffDays > 30;
-            } catch (error) {
+            } catch{
                 return true;
             }
         }
