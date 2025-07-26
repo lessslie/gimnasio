@@ -105,16 +105,43 @@
         .navbar {
             background: black;
             color: white;
-            padding: 15px;
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
 
-        .navbar a {
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 15px;
+        }
+
+        .navbar-menu a {
             color: white;
             text-decoration: none;
-            margin-left: 15px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+
+        .navbar-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .actions {
@@ -210,18 +237,53 @@
         .modal-content .btn-small {
             padding: 10px 20px;
         }
+
+        /* RESPONSIVE STYLES */
+        @media (max-width: 768px) {
+            .navbar-toggle {
+                display: block;
+            }
+            
+            .navbar-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: black;
+                flex-direction: column;
+                padding: 10px 20px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                z-index: 1000;
+            }
+            
+            .navbar-menu.active {
+                display: flex;
+            }
+            
+            .navbar-menu a {
+                padding: 12px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                text-align: center;
+            }
+            
+            .navbar-menu a:last-child {
+                border-bottom: none;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="navbar">
-        <span>OLIMPO GYM</span>
-        <div>
+        <span class="navbar-brand">OLIMPO GYM</span>
+        <button class="navbar-toggle" id="navbarToggle">☰</button>
+        <div class="navbar-menu" id="navbarMenu">
             <a href="register.html">Registrar Cliente</a>
+            <a href="notifications.html">🔔 Notificaciones</a>
             <a href="gym-qr.html" target="_blank">QR</a>
             <a href="./entry.html">Registrar Entrada</a>
             <a href="./calendar.html">Calendario</a>
-            <a href="notifications.html">🔔 Notificaciones</a>
             <a href="#" id="logoutBtn">Salir</a>
         </div>
     </div>
@@ -234,15 +296,36 @@
     </div>
 
     <!-- Incluir configuración segura -->
-     <script src="js/env-config.js"></script>
+    <script src="js/env-config.js"></script>
     <script src="js/config.js"></script>
-  
     <script>
-
-
         // Obtener configuración de API
         const BIN_ID = window.ENV?.JSONBIN_BIN_ID || window.APP_CONFIG?.BIN_ID || '';
         const API_KEY = window.ENV?.JSONBIN_API_KEY || window.APP_CONFIG?.API_KEY || '';
+
+        // NAVBAR RESPONSIVE
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggle = document.getElementById('navbarToggle');
+            const navbarMenu = document.getElementById('navbarMenu');
+            
+            if (navbarToggle && navbarMenu) {
+                navbarToggle.addEventListener('click', function() {
+                    navbarMenu.classList.toggle('active');
+                });
+                
+                navbarMenu.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'A') {
+                        navbarMenu.classList.remove('active');
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!navbarToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
+                        navbarMenu.classList.remove('active');
+                    }
+                });
+            }
+        });
 
         function formatDate(dateString) {
             if (!dateString) return '-';
