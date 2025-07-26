@@ -16,7 +16,7 @@ Sistema web para gestión de gimnasio desarrollado para OLIMPO GYM. Permite admi
 
 ## 🚀 Demo
 
-[Ver sitio en vivo](https://olimpo-gimnasio.netlify.app)
+[Ver sitio en vivo](https://gimnasio-olimpo.netlify.app/)
 
 ## 🛠️ Tecnologías Utilizadas
 

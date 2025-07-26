@@ -436,60 +436,74 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        function createWhatsAppLink(phoneNumber, message) {
-            // Limpiar el número: sacar todoo lo que no sea dígitos
-            let cleanPhone = phoneNumber.replace(/\D/g, '');
-            
-            // Debug: mostrar en consola para ver qué está pasando
-            console.log('Número original:', phoneNumber);
-            console.log('Número limpio:', cleanPhone);
-            
-            // Lógica para números argentinos
-            if (cleanPhone.length === 10 && cleanPhone.startsWith('266')) {
-                // Números de Mendoza: 2664xxxxx -> 5492664xxxxx
-                cleanPhone = '549' + cleanPhone;
-            } else if (cleanPhone.length === 10 && cleanPhone.startsWith('11')) {
-                // Números de Buenos Aires: 11xxxxxxxx -> 5411xxxxxxxx
-                cleanPhone = '54' + cleanPhone;
-            } else if (cleanPhone.length === 10) {
-                // Otros números de 10 dígitos -> agregar 549
-                cleanPhone = '549' + cleanPhone;
-            } else if (!cleanPhone.startsWith('54')) {
-                // Si no empieza con 54, agregarlo
-                cleanPhone = '549' + cleanPhone;
-            }
-            
-            console.log('Número final:', cleanPhone);
-            
-            const encodedMessage = encodeURIComponent(message);
-            const finalUrl = `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`;
-            
-            console.log('URL final:', finalUrl);
-            
-            return finalUrl;
-        }
 
-        function openWhatsApp(url) {
-            console.log('Abriendo WhatsApp con URL:', url);
-            
-            // Crear un elemento <a> invisible y hacer clic automático
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            
-            // Agregarlo al DOM temporalmente
-            document.body.appendChild(link);
-            
-            // Hacer clic automático
-            link.click();
-            
-            // Removerlo del DOM
-            document.body.removeChild(link);
-            
-            console.log('Click automático ejecutado');
-        }
 
+function createWhatsAppLink(phoneNumber, message) {
+    // Limpiar el número: sacar toodo lo que no sea dígitos
+    let cleanPhone = phoneNumber.replace(/\D/g, '');
+    
+    // Debug: mostrar en consola para ver qué está pasando
+    console.log('Número original:', phoneNumber);
+    console.log('Número limpio:', cleanPhone);
+    
+    // Lógica para números argentinos
+    if (cleanPhone.length === 10 && cleanPhone.startsWith('266')) {
+        // Números de Mendoza: 2664xxxxx -> 5492664xxxxx
+        cleanPhone = '549' + cleanPhone;
+    } else if (cleanPhone.length === 10 && cleanPhone.startsWith('11')) {
+        // Números de Buenos Aires: 11xxxxxxxx -> 5411xxxxxxxx
+        cleanPhone = '54' + cleanPhone;
+    } else if (cleanPhone.length === 10) {
+        // Otros números de 10 dígitos -> agregar 549
+        cleanPhone = '549' + cleanPhone;
+    } else if (!cleanPhone.startsWith('54')) {
+        // Si no empieza con 54, agregarlo
+        cleanPhone = '549' + cleanPhone;
+    }
+    
+    console.log('Número final:', cleanPhone);
+    
+    const encodedMessage = encodeURIComponent(message);
+    
+    // 📱 DETECCIÓN DE DISPOSITIVO - ESTA ES LA MEJORA CLAVE
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // URL diferente según dispositivo
+    const baseUrl = isMobile 
+        ? 'https://api.whatsapp.com/send'  // Para móviles - abre la app
+        : 'https://web.whatsapp.com/send'; // Para desktop - abre WhatsApp Web
+    
+    const finalUrl = `${baseUrl}?phone=${cleanPhone}&text=${encodedMessage}`;
+    
+    console.log('Dispositivo:', isMobile ? 'Móvil' : 'Desktop');
+    console.log('URL final:', finalUrl);
+    
+    return finalUrl;
+}
+
+function openWhatsApp(url) {
+    console.log('Abriendo WhatsApp con URL:', url);
+    
+    // 📱 DETECCIÓN MEJORADA PARA MÓVILES
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+        // Para móviles: intentar abrir la app directamente
+        window.location.href = url;
+    } else {
+        // Para desktop: abrir en nueva pestaña (como antes)
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    console.log('WhatsApp abierto');
+}
         function createReminderWhatsAppLink(clientName, expiryDate, daysLeft) {
             const message = `Recordatorio: ${clientName} ${daysLeft <= 0 ? 'tiene membresía vencida' : 'vence en ' + daysLeft + ' día' + (daysLeft > 1 ? 's' : '')} (${expiryDate}). Contactar para renovación.`;
             return createWhatsAppLink(PHONE_ADMIN, message); // Se envía al administrador
