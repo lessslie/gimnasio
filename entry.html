@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Entrada - OLIMPO GYM</title>
+    <style>
+        body {
+            background: url('img/olimpo_blanco.jpeg') center center/cover no-repeat fixed;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll;
+            }
+        }
+
+        .hero {
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .warning {
+            background: #ffebee;
+            color: #c62828;
+            margin-top: 10px;
+            font-size: 16px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .navbar {
+            background: black;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar-menu {
+                display: none;
+            }
+
+            .navbar-toggler {
+                display: block;
+            }
+
+            .navbar-menu.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <span>OLIMPO GYM</span>
+        <div>
+            <a href="clients.html">Ver Clientes</a>
+            <a href="gym-qr.html" target="_blank">QR</a>
+            <a href="#" id="logoutBtn">Salir</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1 style="text-align: center; margin-bottom: 20px;">OLIMPO GYM</h1>
+
+        <input type="text" id="dni" placeholder="Ingresa tu DNI">
+        <button id="registerButton">Registrar Entrada</button>
+        <div id="message" class="message"></div>
+        <div id="membershipWarning" class="warning" style="display: none;"></div>
+    </div>
+
+    <!-- Incluir configuración segura -->
+    <script src="js/config.js"></script>
+    <script>
+     
+
+        // Obtener configuración de API
+        const BIN_ID = window.ENV?.JSONBIN_BIN_ID || window.APP_CONFIG?.BIN_ID || '';
+        const API_KEY = window.ENV?.JSONBIN_API_KEY || window.APP_CONFIG?.API_KEY || '';
+
+        async function getData() {
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    headers: {
+                        'X-Master-Key': API_KEY,
+                        'X-Bin-Meta': false
+                    }
+                });
+                const data = await response.json();
+                return data || { clients: [], entries: [] };
+            } catch (error) {
+                console.error('Error al obtener datos:', error);
+                return { clients: [], entries: [] };
+            }
+        }
+
+        async function saveData(data) {
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(data)
+                });
+            } catch (error) {
+                console.error('Error al guardar datos:', error);
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+        }
+
+        function showMembershipWarning(text) {
+            const warningDiv = document.getElementById('membershipWarning');
+            warningDiv.textContent = text;
+            warningDiv.style.display = 'block';
+        }
+
+        function hideMembershipWarning() {
+            const warningDiv = document.getElementById('membershipWarning');
+            warningDiv.style.display = 'none';
+        }
+
+        function isExpired(paymentDate) {
+            if (!paymentDate) return true;
+            const lastPayment = new Date(paymentDate);
+            const today = new Date();
+            const diffTime = Math.abs(today - lastPayment);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 30;
+        }
+
+        document.getElementById('registerButton').addEventListener('click', async function () {
+            const userDni = document.getElementById('dni').value.trim();
+            hideMembershipWarning();
+
+            if (!userDni) {
+                showMessage('Por favor, ingresa tu DNI', 'error');
+                return;
+            }
+
+            const data = await getData();
+            const client = data.clients.find(c => c.dni === userDni);
+
+            if (client) {
+                const today = new Date().toLocaleDateString();
+                const alreadyCheckedIn = data.entries.some(entry =>
+                    entry.dni === userDni &&
+                    new Date(entry.timestamp).toLocaleDateString() === today
+                );
+
+                if (alreadyCheckedIn) {
+                    showMessage('Ya registraste tu entrada hoy', 'error');
+                    return;
+                }
+
+                const newEntry = {
+                    dni: client.dni,
+                    name: client.name,
+                    memberNumber: client.memberNumber,
+                    timestamp: new Date().toISOString()
+                };
+
+                data.entries.push(newEntry);
+                await saveData(data);
+
+                showMessage(`¡Bienvenido ${client.name}!`, 'success');
+
+                if (isExpired(client.paymentDate)) {
+                    showMembershipWarning('Tu membresía está vencida. Por favor, acércate a administración para regularizar tu situación.');
+                }
+
+                document.getElementById('dni').value = '';
+            } else {
+                showMessage('DNI no registrado', 'error');
+            }
+        });
+
+        // Verificar si venimos desde el QR y obtener el DNI de la URL
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dniFromQR = urlParams.get('dni');
+            if (dniFromQR) {
+                document.getElementById('dni').value = dniFromQR;
+                document.getElementById('registerButton').click();
+            }
+        };
+
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+
+</html>

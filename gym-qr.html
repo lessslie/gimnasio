@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR OLIMPO GYM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: url('img/olimpo_blanco.jpeg') center center/cover no-repeat fixed;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        #qrcode {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 20px 0;
+        }
+
+        #qrcode img {
+            margin: 0 auto;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .description {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+            padding: 0 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>QR de Entrada OLIMPO GYM</h1>
+        <div id="qrcode"></div>
+        <button onclick="window.print()">Imprimir QR</button>
+        <div class="description">
+            <p>Escanea este código QR para registrar tu entrada al gimnasio.</p>
+            <p>Recuerda tener tu DNI a mano.</p>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function () {
+            // URL de tu página de entry (asegúrate de que esta URL sea correcta)
+            const entryURL = 'https://olimpo-gimnasio.netlify.app/entry.html';
+
+            // Generar QR
+            const qr = qrcode(0, 'L');
+            qr.addData(entryURL);
+            qr.make();
+
+            // Mostrar QR con un tamaño mayor para mejor visibilidad
+            document.getElementById('qrcode').innerHTML = qr.createImgTag(8);
+        }
+    </script>
+</body>
+
+</html>

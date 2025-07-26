@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Cliente - OLIMPO GYM</title>
+    <style>
+        body {
+            background: url('img/olimpo_blanco.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: black;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .member-number {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .message {
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <span>OLIMPO GYM</span>
+        <div>
+            <a href="clients.html">Ver Clientes</a>
+            <a href="gym-qr.html" target="_blank">QR</a>
+            <a href="./entry.html">Registrar Entrada</a>
+            <a href="#" id="logoutBtn">Salir</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>Registrar Nuevo Cliente</h2>
+            <div class="member-number">
+                Número de Socio: <span id="nextMemberNumber">Cargando...</span>
+            </div>
+            <form id="clientForm">
+                <div class="form-group">
+                    <label for="name">Nombre y Apellido:</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="dni">DNI:</label>
+                    <input type="text" id="dni" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="form-group">
+                    <label for="phone">Teléfono:</label>
+                    <input type="tel" id="phone">
+                </div>
+                <div class="form-group">
+                    <label for="goal">Objetivo de Entrenamiento:</label>
+                    <select id="goal">
+                        <option value="">Seleccionar objetivo</option>
+                        <option value="Hipertrofia">Hipertrofia</option>
+                        <option value="Pérdida de peso">Pérdida de peso</option>
+                        <option value="Fuerza">Fuerza</option>
+                        <option value="Salud general">Salud general</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="paymentDate">Fecha de Pago:</label>
+                    <input type="date" id="paymentDate">
+                </div>
+                <button type="submit">Registrar Cliente</button>
+            </form>
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <!-- Incluir configuración segura -->
+    <script src="js/config.js"></script>
+    <script>
+     
+        // Obtener configuración de API
+        const BIN_ID = window.ENV?.JSONBIN_BIN_ID || window.APP_CONFIG?.BIN_ID || '';
+        const API_KEY = window.ENV?.JSONBIN_API_KEY || window.APP_CONFIG?.API_KEY || '';
+
+        async function getData() {
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    headers: {
+                        'X-Master-Key': API_KEY,
+                        'X-Bin-Meta': false
+                    }
+                });
+                const data = await response.json();
+                return data || { clients: [], entries: [] };
+            } catch (error) {
+                console.error('Error al obtener datos:', error);
+                return { clients: [], entries: [] };
+            }
+        }
+
+        async function saveData(data) {
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(data)
+                });
+                return true;
+            } catch (error) {
+                console.error('Error al guardar datos:', error);
+                return false;
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 1000);
+        }
+
+        async function getNextMemberNumber() {
+            const data = await getData();
+            let maxNumber = 0;
+
+            // Buscar el número de socio más alto
+            data.clients.forEach(client => {
+                if (client.memberNumber) {
+                    const number = parseInt(client.memberNumber);
+                    if (!isNaN(number) && number > maxNumber) {
+                        maxNumber = number;
+                    }
+                }
+            });
+
+            return maxNumber + 1;
+        }
+
+        async function updateMemberNumberDisplay() {
+            const nextNumber = await getNextMemberNumber();
+            document.getElementById('nextMemberNumber').textContent = nextNumber;
+        }
+
+        document.getElementById('clientForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const memberNumber = await getNextMemberNumber();
+            const client = {
+                memberNumber: memberNumber,
+                name: document.getElementById('name').value.trim(),
+                dni: document.getElementById('dni').value.trim(),
+                email: document.getElementById('email').value.trim().toLowerCase(),
+                phone: document.getElementById('phone').value.trim(),
+                goal: document.getElementById('goal').value,
+                paymentDate: document.getElementById('paymentDate').value
+            };
+
+            const data = await getData();
+
+            if (data.clients.some(c => c.dni === client.dni)) {
+                showMessage('Este DNI ya está registrado', 'error');
+                return;
+            }
+
+            if (client.email && data.clients.some(c => c.email === client.email)) {
+                showMessage('Este email ya está registrado', 'error');
+                return;
+            }
+
+            data.clients.push(client);
+
+            if (await saveData(data)) {
+                showMessage('Cliente registrado exitosamente', 'success');
+                this.reset();
+                updateMemberNumberDisplay();
+                setTimeout(() => {
+                    window.location.href = 'clients.html';
+                }, 2000);
+            } else {
+                showMessage('Error al registrar cliente', 'error');
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+            localStorage.removeItem('isLoggedIn');
+            window.location.href = 'login.html';
+        });
+
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        // Cargar el próximo número de socio al iniciar
+        updateMemberNumberDisplay();
+    </script>
+</body>
+
+</html>

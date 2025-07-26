@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - OLIMPO GYM</title>
+    <style>
+        body {
+            background: url('img/olimpo_blanco.jpeg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+        }
+
+        .hero {
+            height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-form {
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input {
+            color: black;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddddddda;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: rgba(240, 248, 255, 0.321);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .back {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back a {
+            color: #666;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-form">
+            <h2>OLIMPO GYM</h2>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Usuario" required>
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
+            <div id="error" class="error">Usuario o contraseña incorrectos</div>
+            <div class="back">
+                <a href="index.html">Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incluir configuración segura -->
+    <script src="js/config.js"></script>
+    <script>
+ // Verificar si ya hay una sesión activa
+        window.onload = function() {
+            if(localStorage.getItem('isLoggedIn')) {
+                window.location.href = 'clients.html';
+            }
+        }
+
+        // Manejar el envío del formulario
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const error = document.getElementById('error');
+
+            // Usar credenciales desde configuración segura
+            const validUsername = window.ENV?.ADMIN_USERNAME || window.APP_CONFIG?.LOGIN_CREDENTIALS?.username || 'Damian';
+            const validPassword = window.ENV?.ADMIN_PASSWORD || window.APP_CONFIG?.LOGIN_CREDENTIALS?.password || 'Damian123.';
+
+            if (username === validUsername && password === validPassword) {
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'clients.html';
+            } else {
+                error.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
