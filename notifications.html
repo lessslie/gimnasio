@@ -203,15 +203,140 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <span>OLIMPO GYM - Notificaciones</span>
-        <div>
+   <div class="navbar">
+        <span class="navbar-brand">OLIMPO GYM - Notificaciones</span>
+        <button class="navbar-toggle" id="navbarToggle">☰</button>
+        <div class="navbar-menu" id="navbarMenu">
             <a href="clients.html">Ver Clientes</a>
             <a href="calendar.html">Calendario</a>
             <a href="register.html">Registrar Cliente</a>
+            <a href="gym-qr.html" target="_blank">QR</a>
+            <a href="./entry.html">Registrar Entrada</a>
             <a href="#" id="logoutBtn">Salir</a>
         </div>
     </div>
+<style>
+/* NAVBAR RESPONSIVE */
+.navbar {
+    background: black;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.navbar-menu {
+    display: flex;
+    gap: 15px;
+}
+
+.navbar-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.navbar-menu a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* RESPONSIVE STYLES */
+@media (max-width: 768px) {
+    .navbar-toggle {
+        display: block;
+    }
+    
+    .navbar-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: black;
+        flex-direction: column;
+        padding: 10px 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        z-index: 1000;
+    }
+    
+    .navbar-menu.active {
+        display: flex;
+    }
+    
+    .navbar-menu a {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        text-align: center;
+    }
+    
+    .navbar-menu a:last-child {
+        border-bottom: none;
+    }
+}
+
+/* EXTRA SMALL SCREENS */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 12px 15px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.1em;
+    }
+    
+    .navbar-menu a {
+        font-size: 0.9em;
+        padding: 10px 0;
+    }
+}
+</style>
+
+<script>
+// JAVASCRIPT PARA EL TOGGLE
+document.addEventListener('DOMContentLoaded', function() {
+    const navbarToggle = document.getElementById('navbarToggle');
+    const navbarMenu = document.getElementById('navbarMenu');
+    
+    if (navbarToggle && navbarMenu) {
+        navbarToggle.addEventListener('click', function() {
+            navbarMenu.classList.toggle('active');
+        });
+        
+        // Cerrar menú al hacer clic en un enlace
+        navbarMenu.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A') {
+                navbarMenu.classList.remove('active');
+            }
+        });
+        
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!navbarToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
+                navbarMenu.classList.remove('active');
+            }
+        });
+    }
+});
+</script>
 
     <div class="container">
         <div class="card header">
