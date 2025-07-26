@@ -304,9 +304,9 @@
 
         function generateWhatsAppMessage(clientName, expiryDate, daysLeft) {
             if (daysLeft <= 0) {
-                return `Hola ${clientName}, tu membresía de OLIMPO GYM venció el ${expiryDate}. ¡Acércate para renovarla! Saludos, Damian.`;
+                return `Hola ${clientName}, tu membresía de OLIMPO GYM venció el ${expiryDate}. ¡Acércate para renovarla! Saludos!`;
             } else {
-                return `Hola ${clientName}, te recordamos que tu membresía de OLIMPO GYM vence en ${daysLeft} día${daysLeft > 1 ? 's' : ''} (${expiryDate}). ¡Acércate para renovarla! Saludos, Damian.`;
+                return `Hola ${clientName}, te recordamos que tu membresía de OLIMPO GYM vence en ${daysLeft} día${daysLeft > 1 ? 's' : ''} (${expiryDate}). ¡Acércate para renovarla! Saludos.`;
             }
         }
 
